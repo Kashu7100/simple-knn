@@ -3,34 +3,37 @@
 # GRAPHDECO research group, https://team.inria.fr/graphdeco
 # All rights reserved.
 #
-# This software is free for non-commercial, research and evaluation use
-# under the terms of the LICENSE.md file.
-#
-# For inquiries contact  george.drettakis@inria.fr
-#
 
-from setuptools import setup
-from torch.utils.cpp_extension import CUDAExtension, BuildExtension
-import os
+from setuptools import setup, find_packages
+from pathlib import Path
 
-cxx_compiler_flags = []
-
-if os.name == 'nt':
-    cxx_compiler_flags.append("/wd4624")
+# Read README if available
+this_directory = Path(__file__).parent
+try:
+    long_description = (this_directory / "README.md").read_text()
+except FileNotFoundError:
+    long_description = "Simple KNN for 3D Gaussian Splatting"
 
 setup(
-    name="simple_knn",
-    ext_modules=[
-        CUDAExtension(
-            name="simple_knn._C",
-            sources=[
-            "spatial.cu",
-            "simple_knn.cu",
-            "ext.cpp"],
-            extra_compile_args={"nvcc": [], "cxx": cxx_compiler_flags})
-        ],
-    cmdclass={
-        'build_ext': BuildExtension
+    name="eden_simple_knn",
+    version="0.1.0a",
+    author="Kashu Yamazaki",
+    description="Simple KNN CUDA implementation for 3D Gaussian Splatting",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/Kashu7100/simple-knn/",
+    # Find the simple_knn package
+    packages=find_packages(),
+    # Include all source files (.cu, .cpp, .h) for JIT compilation
+    package_data={
+        "": ["*.cu", "*.cpp", "*.h", "*.cuh"],
     },
-    version='1.0.0'
+    # Also include source files at repo root
+    include_package_data=True,
+    # Dependencies
+    python_requires=">=3.7",
+    install_requires=[
+        "torch>=1.13.0",
+        "ninja",  # For faster JIT compilation
+    ],
 )
