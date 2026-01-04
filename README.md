@@ -8,7 +8,7 @@ Description: It compute the **average distance to the nearest neighbors** for a 
 
 Install:
 ```bash
-pip install git+https://github.com/camenduru/simple-knn
+pip install eden-simple-knn==0.1.0a0
 ```
 
 Usage:
