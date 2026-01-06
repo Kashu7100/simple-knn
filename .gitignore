@@ -4,4 +4,5 @@ dist/
 simple_knn/*.so
 __pycache__/
 *.pyc
-.egg-info/
+egg-info/
+*.egg-info/
