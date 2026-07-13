@@ -16,7 +16,7 @@ except FileNotFoundError:
 
 setup(
     name="eden_simple_knn",
-    version="0.1.0a",
+    version="0.1.0a1",
     author="Kashu Yamazaki",
     description="Simple KNN CUDA implementation for 3D Gaussian Splatting",
     long_description=long_description,
@@ -24,11 +24,10 @@ setup(
     url="https://github.com/Kashu7100/simple-knn/",
     # Find the simple_knn package
     packages=find_packages(),
-    # Include all source files (.cu, .cpp, .h) for JIT compilation
+    # Ship the .cu/.cpp/.h sources inside the package for JIT compilation
     package_data={
-        "": ["*.cu", "*.cpp", "*.h", "*.cuh"],
+        "simple_knn": ["*.cu", "*.cpp", "*.h", "*.cuh"],
     },
-    # Also include source files at repo root
     include_package_data=True,
     # Dependencies
     python_requires=">=3.7",
