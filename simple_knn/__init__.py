@@ -13,45 +13,19 @@ except ImportError:
         """JIT compile the CUDA extension if pre-built version not available."""
         from torch.utils.cpp_extension import load
 
-        # Get source directory
-        # simple-knn typically has structure:
-        # simple-knn/
-        #   simple_knn/
-        #     __init__.py  (this file)
-        #   spatial.cu
-        #   simple_knn.cu
-        #   ext.cpp
-
+        # The .cu/.cpp sources ship inside this package directory.
         _pkg_path = Path(__file__).parent
-        _src_path = _pkg_path.parent  # Go up to repo root where .cu files are
-
-        # Find all source files
-        sources = []
-
-        # Common simple-knn source files
-        potential_files = [
-            _src_path / "ext.cpp",
-            _src_path / "spatial.cu",
-            _src_path / "simple_knn.cu",
+        sources = [
+            _pkg_path / "ext.cpp",
+            _pkg_path / "spatial.cu",
+            _pkg_path / "simple_knn.cu",
         ]
 
-        for f in potential_files:
-            if f.exists():
-                sources.append(str(f))
-
-        # Also search recursively for any .cu/.cpp files we might have missed
-        for ext in ["*.cu", "*.cpp"]:
-            for p in _src_path.rglob(ext):
-                p_str = str(p)
-                if p_str not in sources and "test" not in p_str.lower():
-                    sources.append(p_str)
-
-        if not sources:
+        missing = [str(f) for f in sources if not f.exists()]
+        if missing:
             raise FileNotFoundError(
-                f"No source files found in {_src_path}. "
-                "Make sure simple-knn is properly installed.\n"
-                f"Package path: {_pkg_path}\n"
-                f"Source path: {_src_path}"
+                f"simple-knn source files missing from {_pkg_path}: {missing}. "
+                "The package appears to be installed without its CUDA sources — reinstall eden-simple-knn."
             )
 
         # Compilation settings
@@ -63,9 +37,6 @@ except ImportError:
         ]
 
         extra_cflags = ["-O3", "-std=c++17"]
-
-        # Include directories
-        include_dirs = [str(_src_path)]
 
         # Build directory
         cuda_ver = (
@@ -92,10 +63,10 @@ except ImportError:
         try:
             extension = load(
                 name="simple_knn_cuda",
-                sources=sources,
+                sources=[str(f) for f in sources],
                 extra_cflags=extra_cflags,
                 extra_cuda_cflags=extra_cuda_cflags,
-                extra_include_paths=include_dirs,
+                extra_include_paths=[str(_pkg_path)],
                 build_directory=build_dir,
                 verbose=is_first_build,
                 with_cuda=True,
